@@ -138,7 +138,7 @@ class Play():
             if m[0] == "T":
                 self.update_team(m[1], m[2], m[3])
             line = drawing_log_file.readline()
-            time.sleep(0.001) # since it is too fast :)
+            # time.sleep(0.001) # since it is too fast :)
 
 
 
