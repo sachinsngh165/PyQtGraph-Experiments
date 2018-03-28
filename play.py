@@ -24,7 +24,44 @@ class Play():
             return 32
         else:
             return team_size 
-        
+    
+    def draw_net(self):
+        pg.setConfigOptions(antialias=True)
+        self.w = pg.GraphicsWindow()
+        self.w.resize(800,600)
+        self.w.setWindowTitle('Overlay Network of the Team')
+        self.v = self.w.addViewBox()
+        self.v.setAspectLocked()
+        self.G = Graph()
+        self.v.addItem(self.G)
+        self.color_map = {'peer': (169,188,245,255), 'monitor': (169,245,208,255), 'malicious': (247,129,129,255)}
+
+    def update_net(self, node, edge, direction):
+        # self.lg.info("Update net", node, edge, direction)
+        if node:
+            if node[0] == "M" and node[1] == "P":
+                if direction == "IN":
+                    self.G.add_node(node,self.color_map['malicious'])
+                else:
+                    self.lg.info("simulator: {} removed from graph (MP)".format(node))
+                    self.G.remove_node(node)
+            elif node[0] == "M":
+                if direction == "IN":
+                    self.G.add_node(node,self.color_map['monitor'])
+                else:
+                    self.G.remove_node(node)
+            else:
+                if direction == "IN":
+                    self.G.add_node(node,self.color_map['peer'])
+                else:
+                    self.G.remove_node(node)
+        else:
+            if direction == "IN":
+                self.G.add_edge(edge)
+            else:
+                self.G.add_edge(edge)
+        pg.QtGui.QApplication.processEvents()
+
     def plot_team(self):
         self.Monitors_rounds = []
         self.WIPs_rounds = []
@@ -81,14 +118,27 @@ class Play():
             self.lg.info("Invalid format file {}".format(self.drawing_log))
             exit()
 
+        self.draw_net()
         self.plot_team()
         time.sleep(1)
         line = drawing_log_file.readline()
         while line != "Bye":
             m = line.strip().split(";", 4)
+            if m[0] == "O":
+                if m[1] == "Node":
+                    if m[2] == "IN":
+                        self.update_net(m[3], None, "IN")
+                    else:
+                        self.update_net(m[3], None, "OUT")
+                else:
+                    if m[2] == "IN":
+                        self.update_net(None, (m[3], m[4]), "IN")
+                    else:
+                        self.update_net(None, (m[3], m[4]), "OUT")
             if m[0] == "T":
                 self.update_team(m[1], m[2], m[3])
             line = drawing_log_file.readline()
+            time.sleep(0.001) # since it is too fast :)
 
 
 

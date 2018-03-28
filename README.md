@@ -23,7 +23,7 @@ Execute
 ```sh
 $ python qtGraph.py
 ```
-![overlay](res/graph.png)
+![overlay](res/overlay_network.gif)
  
  I have just implement a static network yet. Complete implementation of Network Overlay is yet to be done.
  I'll done that very soon ...
