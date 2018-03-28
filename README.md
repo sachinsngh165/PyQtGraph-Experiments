@@ -18,12 +18,13 @@ $ ./test.me
 ![team](res/team.gif)
 
 ##### Network Overlay
-I've implemented a network in pyqtgraph. You can find the implementation inside qtGraph.py. 
-Execute 
-```sh
-$ python qtGraph.py
-```
+
+It shows how the network overlay evolves during the simulation.
+
+**Nodes** represent the following entities:
+
+- green: monitor/trusted peer (M/TPs)
+- blue: regular peer (WIPs)
+- red: malicious peer (MPs)
+
 ![overlay](res/overlay_network.gif)
- 
- I have just implement a static network yet. Complete implementation of Network Overlay is yet to be done.
- I'll done that very soon ...
