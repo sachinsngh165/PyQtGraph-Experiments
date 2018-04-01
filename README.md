@@ -28,3 +28,13 @@ It shows how the network overlay evolves during the simulation.
 - red: malicious peer (MPs)
 
 ![overlay](res/overlay_network.gif)
+
+##### Buffer status
+
+Buffer status for each peer. Each point in the chart represents a chunk in the buffer of a peer:
+
+- black: chunk from the splitter.
+- gray: chunk consumed.
+- others: chunk from other peers. One different color for each peer.
+ 
+![buffer status](res/buffer_status.gif)
