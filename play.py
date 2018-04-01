@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 from pyqtgraph.Qt import QtGui, QtCore
-import numpy as np
 import pyqtgraph as pg
+from pyqtgraph import mkBrush,mkPen,mkColor
 from qtGraph import Graph
+import numpy as np
 
-
-
+# pg.setConfigOption('background', 'w') #to change background to white
 import time
 import fire
 import logging
@@ -60,7 +60,6 @@ class Play():
                 self.G.add_edge(edge)
             else:
                 self.G.add_edge(edge)
-        pg.QtGui.QApplication.processEvents()
 
     def plot_team(self):
         self.Monitors_rounds = []
@@ -69,13 +68,12 @@ class Play():
         self.Monitors_qty = []
         self.WIPs_qty= []
         self.MPs_qty = []
-        self.win = pg.GraphicsWindow(title="Basic plotting examples")
+        self.win = pg.GraphicsWindow(title="Number of Peers in the Team")
         self.win.resize(800,600)
-        self.win.setWindowTitle('pyqtgraph example: Plotting')
 
         # Enable antialiasing for prettier plots
-        pg.setConfigOptions(antialias=True)
-        self.p3 = self.win.addPlot(title="Drawing with points")
+        # pg.setConfigOptions(antialias=True)
+        self.p3 = self.win.addPlot()
         self.p3.addLegend()
         self.lineWIPs = self.p3.plot(pen=(None), symbolBrush=(0,0,255), symbolPen='b',name='#WIP')
         self.lineMonitors = self.p3.plot(pen=(None), symbolBrush=(0,255,0), symbolPen='g',name='#Monitors Peers')
@@ -98,11 +96,118 @@ class Play():
         else:
             self.MPs_rounds.append(float(n_round))
             self.MPs_qty.append(float(quantity))
-            self.lineMPs.setData(self.MPs_rounds,MPs_qty)
+            self.lineMPs.setData(self.MPs_rounds,self.MPs_qty)
 
-        pg.QtGui.QApplication.processEvents()
+    def draw_buffer(self):
+        self.buff_win = pg.GraphicsWindow(title="Buffer Status")
+        self.buff_win.resize(800,700)
+
+        # Enable antialiasing for prettier plots
+        # pg.setConfigOptions(antialias=True)
+
+        self.stringaxis = pg.AxisItem(orientation='bottom')
+        self.leftaxis = pg.AxisItem(orientation='left')
+        self.leftaxis.setTickSpacing(5,1)
+
+        total_peers = self.number_of_monitors + self.number_of_peers + self.number_of_malicious
+        self.p4 = self.buff_win.addPlot(axisItems={'bottom': self.stringaxis,'left':self.leftaxis})
+        self.p4.showGrid(x=True,y=True,alpha=100)
+
+        self.lineIN = self.p4.plot(pen=(None),name='IN',symbol='o',clear=True)
+        # self.lineOUT = self.p4.plot(pen=(None),name='OUT',symbol='o',symbolBrush=mkBrush('#CCCCCC'))
+
+        self.p4.setRange(xRange=[0,total_peers],yRange=[0,self.get_buffer_size()])
+
+        QColors = []
+        for ix in range(total_peers):
+            color = QtGui.QColor(QtCore.qrand() % 256, QtCore.qrand() % 10, QtCore.qrand() % 256)
+            QColors.append(color)
+
+        self.buffer_colors = QColors
+        self.buffer_order = {}
+        self.buffer_index = 0
+        self.buffer_labels = []
+        self.grid = np.zeros(shape=(total_peers,self.get_buffer_size()),dtype=int)
+        self.grid[:] = -1
+        self.colorgrid = np.array([mkColor('#000000')]*(total_peers)*self.get_buffer_size()).reshape(total_peers,self.get_buffer_size())
+        self.x = []
+        self.y = []
+        self.brushes = []
+
+    def update_buffer_round(self, number_of_round):
+        self.buff_win.setWindowTitle("Buffer Status " + number_of_round)
+
+    def update_buffer(self, node, senders_shot):
+        
+        if self.buffer_order.get(node) is None:
+            self.buffer_order[node] = self.buffer_index
+            self.buffer_labels.append(node)
+            xdict = dict(enumerate(self.buffer_labels))
+            self.stringaxis.setTicks([xdict.items()])
+            text = pg.TextItem()
+            text.setText(node)
+            text.setColor(self.buffer_colors[self.buffer_index])
+            text.setFont(QtGui.QFont("arial", 16))
+            text.setPos(self.buffer_index, 1)
+            self.p4.addItem(text)
+            self.buffer_index += 1
+
+        senders_list = senders_shot.split(":")
+        buffer_out = [pos for pos, char in enumerate(senders_list) if char == ""]
+        
+        for bo in buffer_out:
+            self.grid[self.buffer_order[node]][bo] = 0
+            self.colorgrid[self.buffer_order[node],bo] = mkColor('#CCCCCC')
+
+        # _x = []
+        # _y = []
+        # _colors = []
+
+        # for ix in range(self.grid.shape[0]):
+        #     for iy in range(self.grid.shape[1]):
+        #         if(self.grid[ix,iy]==0):
+        #             _x.append(ix) 
+        #             _y.append(iy)
+        # self.lineOUT.setData(x=_x,y=_y,pen=(None))
+
+        buffer_in = [pos for pos, char in enumerate(senders_list) if char != ""]
+        buffer_order_node = self.buffer_order[node]
+
+        color = None
+        for pos in buffer_in:
+            sender_node = senders_list[pos]
+            if sender_node != "S":
+                if self.buffer_order.get(sender_node) is not None:
+                    color_position = self.buffer_order[sender_node]
+                    color = mkColor(self.buffer_colors[color_position])
+                else:
+                    color = mkColor("#FFFFFF")
+            else:
+                color = mkColor("#000000")
+            self.grid[self.buffer_order[node],pos] = 1
+            self.colorgrid[self.buffer_order[node],pos] = color
+
+        _x = []
+        _y = []
+        _colors = []
+
+        for ix in range(self.grid.shape[0]):
+            for iy in range(self.grid.shape[1]):
+                if(self.grid[ix,iy]!=-1):
+                    _x.append(ix) 
+                    _y.append(iy)
+                    _colors.append(self.colorgrid[ix,iy])
+
+        self.brushes = [mkBrush(c) for c in _colors]
+        self.x = _x
+        self.y = _y
+
+        self.lineIN.setData(x=self.x,y=self.y,pen=(None),symbol='o',symbolBrush=self.brushes)
+        self.app.processEvents()
+
 
     def draw(self):
+        self.app = pg.QtGui.QApplication([])
         drawing_log_file = open(self.drawing_log, "r")
 
         # Read configuration from the first line
@@ -120,6 +225,7 @@ class Play():
 
         self.draw_net()
         self.plot_team()
+        self.draw_buffer()
         time.sleep(1)
         line = drawing_log_file.readline()
         while line != "Bye":
@@ -135,10 +241,16 @@ class Play():
                         self.update_net(None, (m[3], m[4]), "IN")
                     else:
                         self.update_net(None, (m[3], m[4]), "OUT")
+
             if m[0] == "T":
                 self.update_team(m[1], m[2], m[3])
+
+            if m[0] == "B":
+                self.update_buffer(m[1], m[2])
+
+            self.app.processEvents()
             line = drawing_log_file.readline()
-            # time.sleep(0.001) # since it is too fast :)
+
 
 
 
