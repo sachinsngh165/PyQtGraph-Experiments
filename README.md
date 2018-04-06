@@ -8,8 +8,8 @@ The purpose of this repository is to demonstrate plotting alternatives for the [
 ### Installation
  PyQtGraph use pyqt as backend so you would need to install pyqt.
  Visit [http://www.pyqtgraph.org/](http://www.pyqtgraph.org/) for other information.
- ### Results
-##### Team Status 
+ ## Results
+### Team Status 
  I already have implemented, the whole Team Status plotting method (inside play.py) in pyqtgraph. And results are amazing. Earlier graphs were even not rendering properly on my Macintosh but now it is plotting like butter. 
 Execute following command to plot team status.
 ```sh
@@ -17,7 +17,7 @@ $ ./test.me
 ```
 ![team](res/team.gif)
 
-##### Network Overlay
+### Network Overlay
 
 It shows how the network overlay evolves during the simulation.
 
@@ -29,7 +29,7 @@ It shows how the network overlay evolves during the simulation.
 
 ![overlay](res/overlay_network.gif)
 
-##### Buffer status
+### Buffer status
 
 Buffer status for each peer. Each point in the chart represents a chunk in the buffer of a peer:
 
