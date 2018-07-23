@@ -107,7 +107,6 @@ class Play():
             self.MPs_rounds.append(float(n_round))
             self.MPs_qty.append(float(quantity))
             self.lineMPs.setData(self.MPs_rounds,self.MPs_qty)
-        # app.processEvents()
 
     def draw_buffer(self):
         self.buff_win = pg.GraphicsLayoutWidget()
@@ -279,7 +278,8 @@ class Play():
             if m[0] == "R":
                 self.update_clr_plot(int(m[1]))
 
-            # app.processEvents()       # This would process all the Qt operations done so far
+            if m[0] !="B":      # if skip over intermediate buffer states, then plotting speed would increase by 2X
+                app.processEvents()       # This would process all the Qt operations done so far
             line = drawing_log_file.readline()
 
 
