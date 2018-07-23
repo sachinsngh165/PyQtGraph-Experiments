@@ -13,12 +13,13 @@ class Graph(pg.GraphItem):
         self.textItems = []
         pg.GraphItem.__init__(self)
         self.pos = []
-        self.edges = [[0,0]]
+        self.edges = [[0,0]]    # edges should have atleast one edge else it will throw error
         self.texts = []
         self.V =0
         self.lineColor = []
         self.nodeColors = []
-        
+    
+    # Clear previous data and set new data, it is overrided to update nodes labels 
     def setData(self, **kwds):
         self.text = kwds.pop('text', [])
         self.data = kwds
@@ -56,10 +57,12 @@ class Graph(pg.GraphItem):
             pos[:,i]*=scale/lim
         return pos
 
+    # following algorithm is taken from networkx with some modification in it
+        # this method would give positions to n nodes, so as to improve nodes visualisation
     def getNodePosn(self,n):
         if n==1:
             return [[0,0]]
-        theta = np.linspace(0, 1, n + 1)[:-1] * 2 * np.pi
+        theta = np.linspace(0, 1, n + 1)[:-1] * 2 * np.pi   # Some trigonometic operations 
         theta = theta.astype(np.float32)
         pos = np.column_stack([np.cos(theta), np.sin(theta)])
         pos = self.rescale_layout(pos, scale=1)+(0,0)
@@ -67,14 +70,14 @@ class Graph(pg.GraphItem):
 
     def add_node(self,name,color=defaultColor):
         if name not in self.texts:
-            self.pos = self.getNodePosn(self.V+1)
+            self.pos = self.getNodePosn(self.V+1)   # Get position for V+1 nodes
             self.texts.append(name)
             self.nodeColors.append(color)
             self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts),symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
             self.V += 1
-            print("{} added ".format(name))
+            # print("{} added ".format(name))
+
     def remove_node(self,n):
-        # pass
         self.pos = np.delete(self.pos,n,axis=0)
         self.texts = np.delete(self.texts,n,axis=0)
         for edge in self.edges:
@@ -82,7 +85,7 @@ class Graph(pg.GraphItem):
                 self.remove_edge(edge)
                 self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts))
         self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts),symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
-        print("{} node removed ".format(n))
+        # print("{} node removed ".format(n))
 
 
     
@@ -102,7 +105,7 @@ class Graph(pg.GraphItem):
             j = self.texts.index(v)
 
         self._add_edge([i,j])
-        print("{} added".format(edge)) 
+        # print("{} added".format(edge)) 
 
     def remove_edge(self,edge):
         u = edge[0]
@@ -111,10 +114,10 @@ class Graph(pg.GraphItem):
             i = self.texts.index(u)
             j = self.texts.index(v)
         except ValueError:
-            print("Such edge not exist")
+            print("No such edge exist")
 
         self._remove_edge([i,j])
-        print("{} removed".format(edge)) 
+        # print("{} removed".format(edge)) 
 
 
     def _add_edge(self,edge):
@@ -131,7 +134,7 @@ class Graph(pg.GraphItem):
             print("No such edge exist")
 
 
-## Start Qt event loop unless running in interactive mode or using pyside.
+## For testing
 if __name__ == '__main__':
     import sys,time
         # Enable antialiasing for prettier plots
@@ -140,16 +143,16 @@ if __name__ == '__main__':
 
     pg.setConfigOptions(antialias=True)
 
-    w = pg.GraphicsWindow()
+    w = pg.GraphicsWindow() # Create a window
     w.setWindowTitle('pyqtgraph example: CustomGraphItem')
     w.resize(800,600)
-    v = w.addViewBox()
-    v.setAspectLocked()
+    v = w.addViewBox()  # add a viewBox to window
+    v.setAspectLocked() # To lock aspect ratio
 
-    g = Graph()
-    v.addItem(g)
+    g = Graph() # Create a graph instance
+    v.addItem(g)    # Add that instance into viewbox
 
-    g.add_node('N0',(169,188,245,255))
+    g.add_node('N0',(169,188,245,255))  # That would a add a node
     g.add_node('N1')
     g.add_node('N2')
     g.add_node('N3')
@@ -158,7 +161,7 @@ if __name__ == '__main__':
     add_edges = [['N0','N1'],['N1','N2'],['N0','N2'],['N3','N4'],['N1','N4']]
                 
     for edge in add_edges:
-        g.add_edge(edge)
+        g.add_edge(edge)    # That would create an edge b/w u and v if edge=[u,v]
         app.processEvents()
         time.sleep(1)
 
