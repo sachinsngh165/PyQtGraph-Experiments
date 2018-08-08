@@ -7,7 +7,7 @@ from pyqtgraph import mkBrush,mkPen,mkColor
 from qtGraph import Graph
 import numpy as np
 import matplotlib.cm as cm
-# pg.setConfigOption('background', 'w') #to change background to white
+pg.setConfigOption('background', 'w') #to change background to white
 import time
 import fire
 import logging
@@ -34,7 +34,7 @@ class Play():
     def draw_net(self):
         pg.setConfigOptions(antialias=True)
         self.w = pg.GraphicsWindow()    # Create new window like matplotlib pyplot
-        self.w.resize(1000,600)
+        self.w.resize(800,600)
         self.w.setWindowTitle('Overlay Network of the Team')
         self.v = self.w.addViewBox()    #Add ViewBox that would contain all the graphics i.e graph structure
         self.v.setAspectLocked()
@@ -210,6 +210,7 @@ class Play():
         self.clrs_per_round = []
         self.clr_win = pg.GraphicsLayoutWidget()
         self.clr_win.setWindowTitle('Chunk Loss Ratio')
+        self.clr_win.resize(800,700)
         self.clr_figure = self.clr_win.addPlot()
         self.clr_figure.addLegend()
         self.lineCLR = self.clr_figure.plot( pen=(None),symbolBrush=mkColor('#000000'), name="CLR", symbol='o', clear=True)
