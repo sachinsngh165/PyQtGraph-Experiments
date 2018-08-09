@@ -80,26 +80,23 @@ class Graph(pg.GraphItem):
 
     def remove_node(self,name):
         if name not in self.texts:
-            return
+            print("Such node not exist")
+            return 
         n = self.texts.index(name)
-        for edge in self.edges:
-            if edge[0]==0 and edge[1]==0:
-                continue
-            if edge[0]==n or edge[1]==n:
-                self._remove_edge(edge)
-
+        self.edges = [[0,0]] + [edge for edge in self.edges[1:] if edge[0]!=n and edge[1]!=n]
         for edge in self.edges:
             if edge[0]>n:
                 edge[0] -= 1
             if edge[1]>n:
                 edge[1] -= 1
-
-        self.pos = self.getNodePosn(self.V-1)   # Get position for V-1 nodes
         del self.nodeColors[n]
         del self.texts[n]
         self.V -=1
-        self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=self.texts,symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
-        # print("{} removed ".format(name))
+        if self.V>0:
+            self.pos = self.getNodePosn(self.V)   # Get position for V-1 nodes
+            self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=self.texts,symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
+            print("{} removed ".format(name))
+
 
 
     
@@ -182,7 +179,7 @@ if __name__ == '__main__':
     app.processEvents()
     remove_edges = [['N0','N1'],['N1','N2'],['N0','N2'],['N3','N4'],['N1','N4']]
     
-    remove_node = ['N0','N1','N2','N3']
+    remove_node = ['N2','N1','N0','N3']
     for node in remove_node:
         g.remove_node(node)
         app.processEvents()

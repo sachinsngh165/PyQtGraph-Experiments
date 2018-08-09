@@ -5,7 +5,8 @@ matplotlib==2.2.2
 numpy==1.14.2
 Pygments==2.2.0
 pyparsing==2.2.0
-PyQt5==5.10.1
+PyQt5==5.11.2
+PyQt5-sip==4.19.12
 pyqtgraph==0.10.0
 python-dateutil==2.7.3
 pytz==2018.5
