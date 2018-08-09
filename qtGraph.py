@@ -15,7 +15,7 @@ class Graph(pg.GraphItem):
         self.pos = []
         self.edges = [[0,0]]    # edges should have atleast one edge else it will throw error
         self.texts = []
-        self.V =0
+        self.V = 0
         self.lineColor = []
         self.nodeColors = []
     
@@ -74,18 +74,32 @@ class Graph(pg.GraphItem):
             self.texts.append(name)
             self.nodeColors.append(color)
             self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts),symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
+            self.updateGraph() 
             self.V += 1
             # print("{} added ".format(name))
 
-    def remove_node(self,n):
-        self.pos = np.delete(self.pos,n,axis=0)
-        self.texts = np.delete(self.texts,n,axis=0)
+    def remove_node(self,name):
+        if name not in self.texts:
+            return
+        n = self.texts.index(name)
         for edge in self.edges:
+            if edge[0]==0 and edge[1]==0:
+                continue
             if edge[0]==n or edge[1]==n:
-                self.remove_edge(edge)
-                self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts))
-        self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=np.array(self.texts),symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
-        # print("{} node removed ".format(n))
+                self._remove_edge(edge)
+
+        for edge in self.edges:
+            if edge[0]>n:
+                edge[0] -= 1
+            if edge[1]>n:
+                edge[1] -= 1
+
+        self.pos = self.getNodePosn(self.V-1)   # Get position for V-1 nodes
+        del self.nodeColors[n]
+        del self.texts[n]
+        self.V -=1
+        self.setData(pos=np.array(self.pos,dtype=float), adj=np.array(self.edges,dtype=int),size=0.1, pxMode=False, text=self.texts,symbolBrush=np.array(self.nodeColors,dtype=[('red',np.ubyte),('green',np.ubyte),('blue',np.ubyte),('alpha',np.ubyte)]))
+        # print("{} removed ".format(name))
 
 
     
@@ -113,10 +127,10 @@ class Graph(pg.GraphItem):
         try: 
             i = self.texts.index(u)
             j = self.texts.index(v)
+            self._remove_edge([i,j])
         except ValueError:
             print("No such edge exist")
 
-        self._remove_edge([i,j])
         # print("{} removed".format(edge)) 
 
 
@@ -165,11 +179,12 @@ if __name__ == '__main__':
         app.processEvents()
         time.sleep(1)
 
-
+    app.processEvents()
     remove_edges = [['N0','N1'],['N1','N2'],['N0','N2'],['N3','N4'],['N1','N4']]
-        
-    for edge in remove_edges:
-        g.remove_edge(edge)
+    
+    remove_node = ['N0','N1','N2','N3']
+    for node in remove_node:
+        g.remove_node(node)
         app.processEvents()
         time.sleep(1)
 
